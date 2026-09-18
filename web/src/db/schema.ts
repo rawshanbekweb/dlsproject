@@ -298,6 +298,9 @@ export const attempts = pgTable(
     durationSec: integer("duration_sec").notNull().default(0),
     keywordCoverage: integer("keyword_coverage").notNull().default(0),
     transcript: text("transcript").notNull().default(""),
+    // "speech" | "written" — yozma javob mikrofon o'rniga (soqov/nutqda
+    // qiynaladigan o'quvchi uchun). Eski qatorlar standart "speech" oladi.
+    modality: text("modality").notNull().default("speech"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

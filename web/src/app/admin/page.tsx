@@ -72,7 +72,7 @@ export default function AdminDashboard() {
     await reload();
   }
 
-  if (err) return <p className="text-red-600">{err}</p>;
+  if (err) return <p role="alert" className="text-red-600">{err}</p>;
   if (!data) return <p className="text-ink-muted">Yuklanmoqda…</p>;
 
   return (
@@ -101,7 +101,11 @@ Yangi modul
         </div>
       </div>
 
-      {msg && <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">{msg}</p>}
+      {msg && (
+        <p role="status" className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">
+          {msg}
+        </p>
+      )}
       <p className="text-xs text-ink-muted">
         O'zgarishlar bazaga darhol saqlanadi, lekin ilova ularni faqat{" "}
         <b>Nashr qilish</b> bosilib versiya oshgandan keyin yuklaydi.
@@ -254,13 +258,21 @@ function ModuleForm({
   }
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 p-4">
+    <div
+      className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="module-form-title"
+    >
       <div className="card w-full max-w-lg space-y-3">
-        <h3 className="text-lg font-semibold">{isNew ? "Yangi modul" : "Modulni tahrirlash"}</h3>
+        <h3 id="module-form-title" className="text-lg font-semibold">
+          {isNew ? "Yangi modul" : "Modulni tahrirlash"}
+        </h3>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">ID</label>
+            <label className="label" htmlFor="module-id">ID</label>
             <input
+              id="module-id"
               className="input"
               value={m.id}
               disabled={!isNew}
@@ -269,8 +281,13 @@ function ModuleForm({
             />
           </div>
           <div>
-            <label className="label">Tur (type)</label>
-            <select className="input" value={m.type} onChange={(e) => set({ type: e.target.value })}>
+            <label className="label" htmlFor="module-type">Tur (type)</label>
+            <select
+              id="module-type"
+              className="input"
+              value={m.type}
+              onChange={(e) => set({ type: e.target.value })}
+            >
               <option value="discussion">discussion</option>
               <option value="storytelling">storytelling</option>
               <option value="picture_narrating">picture_narrating</option>
@@ -279,20 +296,36 @@ function ModuleForm({
             </select>
           </div>
           <div>
-            <label className="label">Sarlavha (uz)</label>
-            <input className="input" value={m.titleUz} onChange={(e) => set({ titleUz: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">Sarlavha (en)</label>
-            <input className="input" value={m.titleEn} onChange={(e) => set({ titleEn: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">Emoji</label>
-            <input className="input" value={m.emoji} onChange={(e) => set({ emoji: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">Tartib</label>
+            <label className="label" htmlFor="module-title-uz">Sarlavha (uz)</label>
             <input
+              id="module-title-uz"
+              className="input"
+              value={m.titleUz}
+              onChange={(e) => set({ titleUz: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="module-title-en">Sarlavha (en)</label>
+            <input
+              id="module-title-en"
+              className="input"
+              value={m.titleEn}
+              onChange={(e) => set({ titleEn: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="module-emoji">Emoji</label>
+            <input
+              id="module-emoji"
+              className="input"
+              value={m.emoji}
+              onChange={(e) => set({ emoji: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="module-sort">Tartib</label>
+            <input
+              id="module-sort"
               className="input"
               type="number"
               value={m.sortOrder}
@@ -301,8 +334,9 @@ function ModuleForm({
           </div>
         </div>
         <div>
-          <label className="label">Tavsif (uz)</label>
+          <label className="label" htmlFor="module-desc">Tavsif (uz)</label>
           <input
+            id="module-desc"
             className="input"
             value={m.descriptionUz}
             onChange={(e) => set({ descriptionUz: e.target.value })}
@@ -316,7 +350,7 @@ function ModuleForm({
           />
           Ilovada ko'rsatilsin (enabled)
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <div className="flex justify-end gap-2">
           <button className="btn-ghost" onClick={onClose}>
             Bekor

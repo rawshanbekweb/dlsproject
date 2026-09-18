@@ -12,6 +12,18 @@ body {
   min-height: 100vh;
 }
 
+/* Klaviatura fokusi — Lab'dagi `.lab-page a:focus-visible` qoidasiga mos,
+   lekin akademik sahifalar uchun (admin/teacher/login). Sichqoncha bilan
+   bosganda emas, faqat Tab bilan o'tganda ko'rinadi. */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid theme("colors.navy.DEFAULT");
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ── Naqshlar ────────────────────────────────────────────
    Tashqi rasm fayli YO'Q — hammasi ichki SVG (data-URI).
    Sabab: offline ishlaydi, litsenziya muammosi yo'q, hajmi ~1KB

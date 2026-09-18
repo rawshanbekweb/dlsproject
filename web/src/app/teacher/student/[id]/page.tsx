@@ -21,6 +21,7 @@ type Attempt = {
   durationSec: number;
   keywordCoverage: number;
   transcript: string;
+  modality?: "speech" | "written";
   createdAt: string;
 };
 
@@ -46,7 +47,7 @@ export default function StudentDetailPage() {
     return (
       <div className="space-y-4">
         <BackLink />
-        <p className="text-state-danger">{error}</p>
+        <p role="alert" className="text-state-danger">{error}</p>
       </div>
     );
   }
@@ -84,11 +85,12 @@ export default function StudentDetailPage() {
   function exportCsv() {
     downloadCsv(
       `speakup-${(student.name || student.id).replace(/\s+/g, "-")}.csv`,
-      ["Sana", "Modul", "Mashq", "Ball", "Grammatika", "WPM", "So'zlar", "Kalit so'z %", "Transkript"],
+      ["Sana", "Modul", "Mashq", "Turi", "Ball", "Grammatika", "WPM", "So'zlar", "Kalit so'z %", "Transkript"],
       attempts.map((a) => [
         new Date(a.createdAt).toLocaleString("uz"),
         a.moduleTitle,
         a.exerciseTitle,
+        a.modality === "written" ? "Yozma" : "Ovoz",
         a.overallScore,
         a.grammarScore ?? "—",
         a.wordsPerMinute,
@@ -192,7 +194,12 @@ function AttemptCard({ attempt: a }: { attempt: Attempt }) {
           {a.overallScore}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-ink">{a.exerciseTitle || "—"}</p>
+          <p className="flex flex-wrap items-center gap-2 font-semibold text-ink">
+            {a.exerciseTitle || "—"}
+            {a.modality === "written" && (
+              <span className="pill-brand !text-[10px]">✍️ Yozma</span>
+            )}
+          </p>
           <p className="mt-0.5 text-sm text-ink-muted">
             {a.moduleTitle} · {new Date(a.createdAt).toLocaleString("uz")}
           </p>

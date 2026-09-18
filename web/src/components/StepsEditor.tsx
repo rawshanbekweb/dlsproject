@@ -24,21 +24,29 @@ export default function StepsEditor({
             value={s.letter}
             maxLength={2}
             placeholder="P"
+            aria-label={`${i + 1}-bosqich harfi`}
             onChange={(e) => update(i, { letter: e.target.value })}
           />
           <input
             className="input flex-1"
             value={s.en}
             placeholder="Position"
+            aria-label={`${i + 1}-bosqich (inglizcha)`}
             onChange={(e) => update(i, { en: e.target.value })}
           />
           <input
             className="input flex-1"
             value={s.uz}
             placeholder="Nuqtai nazar"
+            aria-label={`${i + 1}-bosqich (o'zbekcha)`}
             onChange={(e) => update(i, { uz: e.target.value })}
           />
-          <button type="button" className="btn-danger px-3" onClick={() => remove(i)}>
+          <button
+            type="button"
+            className="btn-danger px-3"
+            aria-label={`${i + 1}-bosqichni o'chirish`}
+            onClick={() => remove(i)}
+          >
             ✕
           </button>
         </div>

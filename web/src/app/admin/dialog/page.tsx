@@ -94,48 +94,48 @@ function DialogEditor() {
 
       <div className="card grid grid-cols-2 gap-3">
         <div>
-          <label className="label">ID</label>
-          <input className="input" value={d.id} disabled={!isNew} onChange={(e) => set({ id: e.target.value })} placeholder="roleplay_new_friend" />
+          <label className="label" htmlFor="dlg-id">ID</label>
+          <input id="dlg-id" className="input" value={d.id} disabled={!isNew} onChange={(e) => set({ id: e.target.value })} placeholder="roleplay_new_friend" />
         </div>
         <div>
-          <label className="label">Modul ID</label>
-          <input className="input" value={d.moduleId} onChange={(e) => set({ moduleId: e.target.value })} />
+          <label className="label" htmlFor="dlg-module-id">Modul ID</label>
+          <input id="dlg-module-id" className="input" value={d.moduleId} onChange={(e) => set({ moduleId: e.target.value })} />
         </div>
         <div>
-          <label className="label">Mavzu (topic)</label>
-          <input className="input" value={d.topic} onChange={(e) => set({ topic: e.target.value })} />
+          <label className="label" htmlFor="dlg-topic">Mavzu (topic)</label>
+          <input id="dlg-topic" className="input" value={d.topic} onChange={(e) => set({ topic: e.target.value })} />
         </div>
         <div>
-          <label className="label">Sarlavha</label>
-          <input className="input" value={d.title} onChange={(e) => set({ title: e.target.value })} />
+          <label className="label" htmlFor="dlg-title">Sarlavha</label>
+          <input id="dlg-title" className="input" value={d.title} onChange={(e) => set({ title: e.target.value })} />
         </div>
         <div>
-          <label className="label">Personaj ismi</label>
-          <input className="input" value={d.characterName} onChange={(e) => set({ characterName: e.target.value })} />
+          <label className="label" htmlFor="dlg-char-name">Personaj ismi</label>
+          <input id="dlg-char-name" className="input" value={d.characterName} onChange={(e) => set({ characterName: e.target.value })} />
         </div>
         <div>
-          <label className="label">Personaj emoji</label>
-          <input className="input" value={d.characterEmoji} onChange={(e) => set({ characterEmoji: e.target.value })} />
+          <label className="label" htmlFor="dlg-char-emoji">Personaj emoji</label>
+          <input id="dlg-char-emoji" className="input" value={d.characterEmoji} onChange={(e) => set({ characterEmoji: e.target.value })} />
         </div>
         <div className="col-span-2">
-          <label className="label">Kirish gapi (intro)</label>
-          <input className="input" value={d.intro} onChange={(e) => set({ intro: e.target.value })} />
+          <label className="label" htmlFor="dlg-intro">Kirish gapi (intro)</label>
+          <input id="dlg-intro" className="input" value={d.intro} onChange={(e) => set({ intro: e.target.value })} />
         </div>
         <div>
-          <label className="label">Vizuallar (yangi qatordan)</label>
-          <textarea className="input min-h-16" value={d.visuals.join("\n")} onChange={(e) => set({ visuals: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })} />
+          <label className="label" htmlFor="dlg-visuals">Vizuallar (yangi qatordan)</label>
+          <textarea id="dlg-visuals" className="input min-h-16" value={d.visuals.join("\n")} onChange={(e) => set({ visuals: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })} />
         </div>
         <div>
-          <label className="label">Tartib</label>
-          <input className="input" type="number" value={d.sortOrder} onChange={(e) => set({ sortOrder: Number(e.target.value) })} />
+          <label className="label" htmlFor="dlg-sort">Tartib</label>
+          <input id="dlg-sort" className="input" type="number" value={d.sortOrder} onChange={(e) => set({ sortOrder: Number(e.target.value) })} />
         </div>
       </div>
 
       <div className="card space-y-3">
         <h2 className="font-semibold">Mnemonika</h2>
         <div>
-          <label className="label">Akronim</label>
-          <input className="input w-40" value={d.acronym} onChange={(e) => set({ acronym: e.target.value })} placeholder="ACTORS" />
+          <label className="label" htmlFor="dlg-acronym">Akronim</label>
+          <input id="dlg-acronym" className="input w-40" value={d.acronym} onChange={(e) => set({ acronym: e.target.value })} placeholder="ACTORS" />
         </div>
         <StepsEditor steps={d.mnemonicSteps} onChange={(s: MnemonicStep[]) => set({ mnemonicSteps: s })} />
       </div>
@@ -155,22 +155,27 @@ function DialogEditor() {
           <div key={i} className="rounded border border-line p-3">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-ink-muted">#{i + 1}</span>
-              <button className="btn-danger px-3 py-1" onClick={() => removeTurn(i)}>
+              <button
+                className="btn-danger px-3 py-1"
+                aria-label={`${i + 1}-almashishni o'chirish`}
+                onClick={() => removeTurn(i)}
+              >
                 ✕
               </button>
             </div>
             <div className="space-y-2">
               <div>
-                <label className="label">Personaj gapi (characterLine)</label>
-                <input className="input" value={t.characterLine} onChange={(e) => updTurn(i, { characterLine: e.target.value })} />
+                <label className="label" htmlFor={`dlg-turn-${i}-line`}>Personaj gapi (characterLine)</label>
+                <input id={`dlg-turn-${i}-line`} className="input" value={t.characterLine} onChange={(e) => updTurn(i, { characterLine: e.target.value })} />
               </div>
               <div>
-                <label className="label">O'quvchi uchun ishora (studentHint)</label>
-                <input className="input" value={t.studentHint} onChange={(e) => updTurn(i, { studentHint: e.target.value })} />
+                <label className="label" htmlFor={`dlg-turn-${i}-hint`}>O'quvchi uchun ishora (studentHint)</label>
+                <input id={`dlg-turn-${i}-hint`} className="input" value={t.studentHint} onChange={(e) => updTurn(i, { studentHint: e.target.value })} />
               </div>
               <div>
-                <label className="label">Kutilgan kalit so'zlar (vergul bilan)</label>
+                <label className="label" htmlFor={`dlg-turn-${i}-keywords`}>Kutilgan kalit so'zlar (vergul bilan)</label>
                 <input
+                  id={`dlg-turn-${i}-keywords`}
                   className="input"
                   value={t.expectedKeywords.join(", ")}
                   onChange={(e) => updTurn(i, { expectedKeywords: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
@@ -181,7 +186,7 @@ function DialogEditor() {
         ))}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-between">
         {!isNew ? (
           <button className="btn-danger" onClick={del}>

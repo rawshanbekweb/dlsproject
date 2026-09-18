@@ -34,6 +34,7 @@
     "publish:content": "tsx scripts/publish-content.ts",
     "gen:tips": "tsx scripts/generate-tips.ts",
     "db:tips": "tsx scripts/add-tips-table.ts",
+    "db:attempt-modality": "tsx scripts/add-attempt-modality.ts",
     "db:conversations": "tsx scripts/add-conversation-tables.ts",
     "seed:conversations": "tsx scripts/seed-conversations.ts",
     "seed:readaloud": "tsx scripts/seed-readaloud.ts",

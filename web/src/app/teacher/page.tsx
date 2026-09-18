@@ -97,7 +97,7 @@ export default function TeacherPage() {
     );
   }
 
-  if (error) return <p className="text-state-danger">{error}</p>;
+  if (error) return <p role="alert" className="text-state-danger">{error}</p>;
   if (!p) return <p className="text-ink-muted">Yuklanmoqda…</p>;
 
   return (
@@ -155,7 +155,7 @@ export default function TeacherPage() {
         </button>
       </div>
 
-      {loading && <p className="text-sm text-ink-muted">Yangilanmoqda…</p>}
+      {loading && <p role="status" className="text-sm text-ink-muted">Yangilanmoqda…</p>}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Urinishlar" value={p.totalAttempts} />

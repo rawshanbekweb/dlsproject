@@ -23,6 +23,9 @@ export type StoredAttempt = {
   durationSec: number;
   keywordCoverage: number;
   grammarScore: number | null;
+  /** "written" — mikrofon o'rniga yozma javob (soqov/nutqda qiynaladigan o'quvchi uchun).
+   * Eski yozuvlarda yo'q — o'qishda `?? "speech"` bilan standartlanadi. */
+  modality?: "speech" | "written";
 };
 
 const KEY = "speakup_attempts";

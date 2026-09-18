@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       durationSec: clamp(num(body.durationSec), 0, 86_400),
       keywordCoverage: clamp(num(body.keywordCoverage), 0, 100),
       transcript: String(body.transcript ?? "").slice(0, 4000),
+      modality: body.modality === "written" ? "written" : "speech",
     });
 
     return NextResponse.json({ ok: true });

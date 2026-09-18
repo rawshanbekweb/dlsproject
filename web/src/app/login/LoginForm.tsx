@@ -64,7 +64,7 @@ export default function LoginForm({ next }: { next?: string }) {
           autoComplete="current-password"
         />
       </div>
-      {error && <p className="text-sm text-state-danger">{error}</p>}
+      {error && <p role="alert" className="text-sm text-state-danger">{error}</p>}
       <button className="btn-primary w-full" disabled={loading}>
         {loading ? "Kirilmoqda…" : "Kirish"}
       </button>

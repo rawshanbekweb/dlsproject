@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useId, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/client";
@@ -77,39 +77,42 @@ function ExerciseEditor() {
 
       <div className="card grid grid-cols-2 gap-3">
         <div>
-          <label className="label">ID</label>
-          <input className="input" value={ex.id} disabled={!isNew} onChange={(e) => set({ id: e.target.value })} placeholder="discussion_family_pets_dream" />
+          <label className="label" htmlFor="ex-id">ID</label>
+          <input id="ex-id" className="input" value={ex.id} disabled={!isNew} onChange={(e) => set({ id: e.target.value })} placeholder="discussion_family_pets_dream" />
         </div>
         <div>
-          <label className="label">Modul ID</label>
-          <input className="input" value={ex.moduleId} onChange={(e) => set({ moduleId: e.target.value })} />
+          <label className="label" htmlFor="ex-module-id">Modul ID</label>
+          <input id="ex-module-id" className="input" value={ex.moduleId} onChange={(e) => set({ moduleId: e.target.value })} />
         </div>
         <div>
-          <label className="label">Mavzu (topic)</label>
-          <input className="input" value={ex.topic} onChange={(e) => set({ topic: e.target.value })} />
+          <label className="label" htmlFor="ex-topic">Mavzu (topic)</label>
+          <input id="ex-topic" className="input" value={ex.topic} onChange={(e) => set({ topic: e.target.value })} />
         </div>
         <div>
-          <label className="label">Sarlavha</label>
-          <input className="input" value={ex.title} onChange={(e) => set({ title: e.target.value })} />
+          <label className="label" htmlFor="ex-title">Sarlavha</label>
+          <input id="ex-title" className="input" value={ex.title} onChange={(e) => set({ title: e.target.value })} />
         </div>
         <div>
-          <label className="label">Taymer (soniya)</label>
-          <input className="input" type="number" value={ex.timeLimitSec} onChange={(e) => set({ timeLimitSec: Number(e.target.value) })} />
+          <label className="label" htmlFor="ex-time">Taymer (soniya)</label>
+          <input id="ex-time" className="input" type="number" value={ex.timeLimitSec} onChange={(e) => set({ timeLimitSec: Number(e.target.value) })} />
         </div>
         <div>
-          <label className="label">Tartib</label>
-          <input className="input" type="number" value={ex.sortOrder} onChange={(e) => set({ sortOrder: Number(e.target.value) })} />
+          <label className="label" htmlFor="ex-sort">Tartib</label>
+          <input id="ex-sort" className="input" type="number" value={ex.sortOrder} onChange={(e) => set({ sortOrder: Number(e.target.value) })} />
         </div>
       </div>
 
       <div className="card space-y-3">
         <h2 className="font-semibold">&quot;Takrorlang&quot; matni</h2>
-        <p className="text-sm text-ink-muted">
+        <p className="text-sm text-ink-muted" id="ex-target-hint">
           To&apos;ldirsangiz mashq turi o&apos;zgaradi: o&apos;quvchi erkin gapirmaydi, aynan shu
           jumlani o&apos;qiydi va har bir so&apos;z alohida tekshiriladi. Talaffuzni o&apos;lchash
           uchun shu tur ishlatiladi. Bo&apos;sh qoldirsangiz — odatdagi erkin nutq mashqi.
         </p>
+        <label className="sr-only" htmlFor="ex-target-text">&quot;Takrorlang&quot; matni</label>
         <textarea
+          id="ex-target-text"
+          aria-describedby="ex-target-hint"
           className="input min-h-[70px]"
           value={ex.targetText}
           onChange={(e) => set({ targetText: e.target.value })}
@@ -126,8 +129,8 @@ function ExerciseEditor() {
       <div className="card space-y-3">
         <h2 className="font-semibold">Mnemonika</h2>
         <div>
-          <label className="label">Akronim</label>
-          <input className="input w-40" value={ex.acronym} onChange={(e) => set({ acronym: e.target.value })} placeholder="PETS" />
+          <label className="label" htmlFor="ex-acronym">Akronim</label>
+          <input id="ex-acronym" className="input w-40" value={ex.acronym} onChange={(e) => set({ acronym: e.target.value })} placeholder="PETS" />
         </div>
         <StepsEditor steps={ex.mnemonicSteps} onChange={(s: MnemonicStep[]) => set({ mnemonicSteps: s })} />
       </div>
@@ -138,7 +141,7 @@ function ExerciseEditor() {
         <ListArea label="Vizuallar — emoji yoki rasm URL (yangi qatordan)" value={ex.visuals} onChange={(v) => set({ visuals: v })} />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-between">
         {!isNew ? (
           <button className="btn-danger" onClick={del}>
@@ -165,10 +168,12 @@ function ListArea({
   value: string[];
   onChange: (v: string[]) => void;
 }) {
+  const id = useId();
   return (
     <div>
-      <label className="label">{label}</label>
+      <label className="label" htmlFor={id}>{label}</label>
       <textarea
+        id={id}
         className="input min-h-20"
         value={value.join("\n")}
         onChange={(e) => onChange(e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}

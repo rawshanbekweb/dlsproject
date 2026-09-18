@@ -22,6 +22,7 @@ import {
 import { Visual } from "@/components/Visual";
 
 type Phase = "ready" | "recording" | "done";
+type Mode = "voice" | "written";
 
 export default function ExercisePage() {
   const params = useParams<{ moduleId: string; exerciseId: string }>();
@@ -32,11 +33,17 @@ export default function ExercisePage() {
   const speech = useSpeechRecognition();
 
   const [phase, setPhase] = useState<Phase>("ready");
+  // Ovoz bilan gapira olmaydigan (soqov/nutqda qiynaladigan) o'quvchi uchun —
+  // xuddi shu mashqni yozib bajarish imkoniyati. Ball formulasi o'zgarmaydi,
+  // faqat matn manbai ASR emas, klaviatura bo'ladi.
+  const [mode, setMode] = useState<Mode>("voice");
+  const [writtenText, setWrittenText] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const [result, setResult] = useState<SpeechResult | null>(null);
   const [readResult, setReadResult] = useState<ReadAloudResult | null>(null);
   const [checkingGrammar, setCheckingGrammar] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [lastModality, setLastModality] = useState<"speech" | "written">("speech");
 
   const module = useMemo(
     () => pack?.modules.find((m) => m.id === moduleId),
@@ -62,8 +69,11 @@ export default function ExercisePage() {
     elapsedRef.current = elapsed;
   }, [elapsed]);
 
+  // Yozma rejimda taymer yo'q — yozishga sarflangan real vaqt shundan hisoblanadi.
+  const writtenStartRef = useRef(0);
+
   const saveAttempt = useCallback(
-    async (r: SpeechResult) => {
+    async (r: SpeechResult, modality: "speech" | "written") => {
       const profile = loadStudent();
 
       // Avval mahalliy saqlaymiz — progress sahifasi shundan hisoblanadi va
@@ -79,6 +89,7 @@ export default function ExercisePage() {
         durationSec: r.durationSec,
         keywordCoverage: r.keywordCoverage,
         grammarScore: r.grammarScore,
+        modality,
       });
 
       try {
@@ -100,6 +111,7 @@ export default function ExercisePage() {
             durationSec: r.durationSec,
             keywordCoverage: r.keywordCoverage,
             transcript: r.transcript,
+            modality,
           }),
         });
       } catch {
@@ -109,19 +121,19 @@ export default function ExercisePage() {
     [moduleId, exerciseId, exercise],
   );
 
-  const finish = useCallback(() => {
-    speech.stop();
-    setPhase("done");
-    // Oxirgi natija kelib ulgurishi uchun qisqa kutamiz (Android'da ham shunday).
-    window.setTimeout(async () => {
-      const transcript = finalTextRef.current.trim();
-      const seconds = Math.max(1, elapsedRef.current);
+  // Ovoz va yozma rejim ikkalasi ham shu yerga tushadi — baholash formulasi
+  // faqat `transcript`/`durationSec`ni ko'radi, matn qayerdan kelganini
+  // bilmaydi (ASR yoki klaviatura). Shu sabab Kotlin porti bilan mos qoladi:
+  // yozma rejim uchun alohida ball formulasi yo'q, mavjudi qayta ishlatiladi.
+  const finishWithTranscript = useCallback(
+    async (transcript: string, seconds: number, alternatives: string[], modality: "speech" | "written") => {
+      setLastModality(modality);
 
       // "Takrorlang" mashqi: kutilgan matn ma'lum, so'zma-so'z solishtiramiz.
       // Grammatika tekshirilmaydi — matn bolaniki emas, bizniki.
       const target = exercise?.targetText ?? "";
       if (target.trim() !== "") {
-        const read = analyzeReadAloud(target, transcript, seconds, speech.takeAlternatives());
+        const read = analyzeReadAloud(target, transcript, seconds, alternatives);
         setReadResult(read);
         const spokenWords = transcript.split(/\s+/).filter(Boolean);
         const asResult: SpeechResult = {
@@ -142,7 +154,7 @@ export default function ExercisePage() {
           tips: read.tips,
         };
         setResult(asResult);
-        if (spokenWords.length > 0) void saveAttempt(asResult);
+        if (spokenWords.length > 0) void saveAttempt(asResult, modality);
         return;
       }
 
@@ -150,8 +162,7 @@ export default function ExercisePage() {
         transcript,
         seconds,
         exercise?.keywords ?? [],
-        // takeAlternatives barqaror (useCallback + ref), shuning uchun eskirmaydi.
-        speech.takeAlternatives(),
+        alternatives,
         // Murabbiy struktura bo'yicha maslahat bera olishi uchun.
         exercise?.mnemonic.steps.map((s) => s.en) ?? [],
         // Mashqqa xos maslahat banki — bo'sh bo'lsa umumiy matnlar ishlatiladi.
@@ -179,30 +190,55 @@ export default function ExercisePage() {
       }
       setCheckingGrammar(false);
       setResult(finalResult);
-      void saveAttempt(finalResult);
+      void saveAttempt(finalResult, modality);
+    },
+    [exercise, saveAttempt],
+  );
+
+  const finish = useCallback(() => {
+    speech.stop();
+    setPhase("done");
+    // Oxirgi natija kelib ulgurishi uchun qisqa kutamiz (Android'da ham shunday).
+    window.setTimeout(() => {
+      const transcript = finalTextRef.current.trim();
+      const seconds = Math.max(1, elapsedRef.current);
+      void finishWithTranscript(transcript, seconds, speech.takeAlternatives(), "speech");
     }, 400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercise, saveAttempt]);
+  }, [finishWithTranscript]);
+
+  const submitWritten = useCallback(
+    (text: string) => {
+      const transcript = text.trim();
+      if (!transcript) return;
+      const seconds = Math.max(1, Math.round((Date.now() - writtenStartRef.current) / 1000));
+      setPhase("done");
+      void finishWithTranscript(transcript, seconds, [], "written");
+    },
+    [finishWithTranscript],
+  );
 
   useEffect(() => {
-    if (phase !== "recording") return;
+    // Taymer va limit faqat ovoz rejimida — yozma rejimda o'quvchi shoshilmasdan
+    // yozadi, mikrofon uchun mo'ljallangan soniya chegarasi unga tegishli emas.
+    if (phase !== "recording" || mode !== "voice") return;
     // Pauzada vaqt sanalmaydi — o'quvchi o'ylab olsa ham ajratilgan
     // soniyalari yonib ketmasin.
     if (speech.paused) return;
     const id = window.setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => window.clearInterval(id);
-  }, [phase, speech.paused]);
+  }, [phase, mode, speech.paused]);
 
   useEffect(() => {
-    if (phase === "recording" && elapsed >= limit) finish();
-  }, [elapsed, phase, limit, finish]);
+    if (phase === "recording" && mode === "voice" && elapsed >= limit) finish();
+  }, [elapsed, phase, mode, limit, finish]);
 
   useEffect(() => {
-    if (phase === "recording" && speech.error) {
+    if (phase === "recording" && mode === "voice" && speech.error) {
       setPhase("ready");
       setElapsed(0);
     }
-  }, [speech.error, phase]);
+  }, [speech.error, phase, mode]);
 
   const isReadAloud = (exercise?.targetText ?? "").trim() !== "";
 
@@ -214,7 +250,12 @@ export default function ExercisePage() {
     setElapsed(0);
     elapsedRef.current = 0;
     finalTextRef.current = "";
-    speech.start();
+    setWrittenText("");
+    if (mode === "written") {
+      writtenStartRef.current = Date.now();
+    } else {
+      speech.start();
+    }
     setPhase("recording");
   };
 
@@ -361,21 +402,56 @@ export default function ExercisePage() {
               className="mb-6 justify-center"
               bubbleClassName="bg-surface-muted text-left"
             />
-            <MicRing
-              recording={false}
-              elapsed={0}
-              limit={limit}
-              disabled={!speech.supported}
-              onClick={start}
-            />
-            <p className="mt-4 text-[15px] text-ink">
-              Tayyor bo&apos;lsangiz mikrofonni bosing va gapiring
-            </p>
-            <p className="mt-1 overline">Maksimal {limit} soniya</p>
+            {mode === "voice" ? (
+              <>
+                <MicRing
+                  recording={false}
+                  elapsed={0}
+                  limit={limit}
+                  disabled={!speech.supported}
+                  onClick={start}
+                />
+                <p className="mt-4 text-[15px] text-ink">
+                  Tayyor bo&apos;lsangiz mikrofonni bosing va gapiring
+                </p>
+                <p className="mt-1 overline">Maksimal {limit} soniya</p>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={start}
+                  className="btn-primary mx-auto !px-8 !py-3.5"
+                >
+                  ✍️ Yozishni boshlash
+                </button>
+                <p className="mt-4 text-[15px] text-ink">
+                  Tugmani bosing va javobingizni pastdagi maydonga yozing
+                </p>
+              </>
+            )}
+            {/* Ovoz bilan gapira olmaydigan o'quvchi uchun — mashq shu yerda
+                bloklanib qolmasin. Ball formulasi ikkala rejimda ham bir xil. */}
+            <button
+              type="button"
+              onClick={() => setMode((m) => (m === "voice" ? "written" : "voice"))}
+              className="mt-5 text-sm font-medium text-navy underline underline-offset-2"
+            >
+              {mode === "voice" ? "✍️ Buning o'rniga yozma javob beraman" : "🎤 Buning o'rniga gapirib javob beraman"}
+            </button>
           </div>
         )}
 
-        {phase === "recording" && (
+        {phase === "recording" && mode === "written" && (
+          <WrittenAnswer
+            initialText={writtenText}
+            onChange={setWrittenText}
+            onSubmit={submitWritten}
+            target={isReadAloud ? exercise.targetText : undefined}
+          />
+        )}
+
+        {phase === "recording" && mode === "voice" && (
           <div className="mt-7">
             {/* Do'st tinglayapti. Android'dan farqli o'laroq ovoz balandligiga
                 javob bermaydi — Web Speech API mikrofon darajasini bermaydi. */}
@@ -459,6 +535,7 @@ export default function ExercisePage() {
             checkingGrammar={checkingGrammar}
             readResult={readResult}
             friend={friend}
+            modality={lastModality}
             onRetry={start}
           />
         )}
@@ -528,12 +605,68 @@ function MicRing({
   );
 }
 
+/**
+ * Yozma javob maydoni — mikrofon o'rniga. `LabConversation.tsx`dagi
+ * `AnswerInput`ga o'xshash, lekin bu yerda ovoz fallback kerak emas
+ * (rejim tanlovi mic ekranida allaqachon qilingan).
+ */
+function WrittenAnswer({
+  initialText,
+  onChange,
+  onSubmit,
+  target,
+}: {
+  initialText: string;
+  onChange: (text: string) => void;
+  onSubmit: (text: string) => void;
+  target?: string;
+}) {
+  const [text, setText] = useState(initialText);
+  return (
+    <div className="mt-7">
+      <form
+        className="card"
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(text);
+        }}
+      >
+        <label className="label" htmlFor="written-answer">
+          {target ? "Shu jumlani yozing" : "Javobingizni yozing"}
+        </label>
+        <textarea
+          id="written-answer"
+          className="input min-h-32"
+          value={text}
+          maxLength={2000}
+          autoFocus
+          placeholder={target ?? "Ingliz tilida javobingizni shu yerga yozing…"}
+          onChange={(e) => {
+            setText(e.target.value);
+            onChange(e.target.value);
+          }}
+        />
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <span className="text-overline uppercase text-ink-muted">{text.length}/2000</span>
+          <button type="submit" className="btn-primary" disabled={!text.trim()}>
+            Tayyor, tekshirish
+          </button>
+        </div>
+      </form>
+      <p className="mt-3 text-center text-xs text-ink-muted">
+        Taymer yo&apos;q — shoshilmasdan yozing. Tayyor bo&apos;lganda tugmani bosing.
+      </p>
+    </div>
+  );
+}
+
 function Result({
   result,
   keywords,
   checkingGrammar,
   readResult,
   friend,
+  modality,
   onRetry,
 }: {
   result: SpeechResult;
@@ -541,6 +674,7 @@ function Result({
   checkingGrammar: boolean;
   readResult: ReadAloudResult | null;
   friend: MascotLook;
+  modality: "speech" | "written";
   onRetry: () => void;
 }) {
   // Matn Android'dagi bilan bir xil — personaj bolaning tilida gapiradi.
@@ -557,9 +691,13 @@ function Result({
         <div className="flex justify-center">
           <Mascot look={friend} mood="thinking" size={80} />
         </div>
-        <p className="mt-2 font-semibold text-ink">Hech narsa eshitilmadi</p>
+        <p className="mt-2 font-semibold text-ink">
+          {modality === "written" ? "Matn kiritilmadi" : "Hech narsa eshitilmadi"}
+        </p>
         <p className="mt-1 text-sm text-ink-muted">
-          Mikrofonga yaqinroq va balandroq gapirib qayta urinib ko&apos;ring.
+          {modality === "written"
+            ? "Javob maydoniga bir necha so'z yozib qayta urinib ko'ring."
+            : "Mikrofonga yaqinroq va balandroq gapirib qayta urinib ko'ring."}
         </p>
         <button onClick={onRetry} className="btn-primary mt-4">
           <Icon name="refresh" size={16} />
@@ -571,6 +709,9 @@ function Result({
 
   return (
     <div className="mt-6 space-y-3">
+      {modality === "written" && (
+        <p className="pill-brand w-fit">✍️ Yozma urinish</p>
+      )}
       {/* Ball va ko'rsatkichlar — bitta blokda. */}
       <div className="card">
         <div className="flex flex-col items-center gap-6 sm:flex-row">
@@ -587,7 +728,10 @@ function Result({
           <div className="grid w-full grid-cols-3 gap-x-4 gap-y-5 sm:border-l sm:border-line sm:pl-6">
             <Stat value={result.wordCount} label="So'zlar" />
             <Stat value={result.uniqueWordCount} label="Noyob so'z" />
-            <Stat value={result.wordsPerMinute} label="So'z/daqiqa" />
+            <Stat
+              value={result.wordsPerMinute}
+              label={modality === "written" ? "So'z/daqiqa (yozish)" : "So'z/daqiqa"}
+            />
             <Stat value={`${result.durationSec}s`} label="Davomiylik" />
             <Stat
               value={`${result.matchedKeywords.length}/${result.totalKeywords}`}

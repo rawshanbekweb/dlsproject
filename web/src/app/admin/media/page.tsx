@@ -81,14 +81,14 @@ export default function MediaPage() {
           </div>
         </div>
         <div className="min-w-[160px] flex-1">
-          <label className="label">Izoh (alt)</label>
-          <input className="input" value={alt} onChange={(e) => setAlt(e.target.value)} />
+          <label className="label" htmlFor="media-alt">Izoh (alt)</label>
+          <input id="media-alt" className="input" value={alt} onChange={(e) => setAlt(e.target.value)} />
         </div>
         <button className="btn-primary" onClick={upload} disabled={uploading || !fileName}>
           {uploading ? "Yuklanmoqda…" : "Yuklash"}
         </button>
       </div>
-      {error && <p className="text-sm text-state-danger">{error}</p>}
+      {error && <p role="alert" className="text-sm text-state-danger">{error}</p>}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {rows.map((m) => (
