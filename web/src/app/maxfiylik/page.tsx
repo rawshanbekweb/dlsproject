@@ -66,6 +66,14 @@ export default function PrivacyPolicy() {
           matni yo‘qoladi; saytning brauzerdagi ma’lumotlarini tozalash natijalarni ham
           o‘chiradi. Ovozli kiritishda quyida tasvirlangan brauzer nutq tanish xizmati
           ishlatiladi. Matnni qo‘lda yozish ham mumkin.
+          <br />
+          <br />
+          <strong>Imo-ishora mashqi:</strong> kamera video kadri hech qachon SpeakUp
+          serveriga yuborilmaydi va fayl sifatida saqlanmaydi — qo‘l harakati butunlay
+          shu brauzerda (qurilmaning o‘zida) tahlil qilinadi. Faqat 21 nuqtaning
+          ekrandagi joylashuvi (raqamlar, rasm emas) vaqtincha xotirada ishlatiladi,
+          natijada faqat ball ko‘rinadi. Bu jarayon gapira olmaydigan yoki eshitishda
+          qiyinchiligi bo‘lgan o‘quvchilar ham mashq qila olishi uchun qo‘shildi.
         </div>
 
         <Section title="1. Kim ma'lumotni yig'adi">

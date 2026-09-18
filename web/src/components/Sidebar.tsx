@@ -10,6 +10,7 @@ type NavLink = { href: string; label: string; icon: IconName; adminOnly: boolean
 const links: NavLink[] = [
   { href: "/admin", label: "Kontent", icon: "library", adminOnly: true },
   { href: "/admin/media", label: "Media", icon: "image", adminOnly: true },
+  { href: "/admin/signs", label: "Imo-ishoralar", icon: "voice", adminOnly: true },
   { href: "/teacher", label: "Progress", icon: "chart", adminOnly: false },
 ];
 

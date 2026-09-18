@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Nomi } from "./Nomi";
+import { signWords } from "@/lib/sign-content";
 
 export function LabCards() {
   return (
@@ -22,6 +23,16 @@ export function LabCards() {
           <div className="lab-feature-meta"><span>3 vazifa</span><span>Interaktiv xona</span></div>
           <p>Sen ayt, Nomi joylashtirsin. Noaniq ko‘rsatmani birgalikda aniqlashtirib, xonani o‘zing yarat.</p>
           <span className="lab-card-link">Laboratoriyaga kirish <span aria-hidden="true">↗</span></span>
+        </div>
+      </Link>
+      <Link href="/student/lab/signs" className="lab-feature lab-feature--signs">
+        <div className="lab-feature-art" aria-hidden="true"><span className="lab-art-index">03</span><span style={{ fontSize: 64 }}>🤟</span><span className="lab-float-note">Hello!</span><span className="lab-art-skill">IMO-ISHORA</span></div>
+        <div className="lab-feature-copy">
+          <span className="lab-eyebrow">03 / Ovozsiz ham gapirish mumkin</span>
+          <h3>Imo-ishora mashqi</h3>
+          <div className="lab-feature-meta"><span>{signWords.length} ta so‘z</span><span>Kamera orqali</span></div>
+          <p>So‘zni ko‘r, kamera oldida imo bilan ko‘rsat. Gapira olmasang ham, mashq qilaverasan.</p>
+          <span className="lab-card-link">Imo bilan boshlash <span aria-hidden="true">↗</span></span>
         </div>
       </Link>
     </div>

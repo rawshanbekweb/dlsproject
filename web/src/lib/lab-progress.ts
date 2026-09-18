@@ -1,13 +1,13 @@
 "use client";
 
-export type LabCompletion = { mode: "teach" | "room"; missionId: string; turns: number; timestamp: number };
+export type LabCompletion = { mode: "teach" | "room" | "sign"; missionId: string; turns: number; timestamp: number };
 const KEY = "speakup_lab_progress_v1";
 
 export function loadLabProgress(): LabCompletion[] {
   try {
     const data: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? "[]");
     if (!Array.isArray(data)) return [];
-    return data.filter((item): item is LabCompletion => item && (item.mode === "teach" || item.mode === "room") && typeof item.missionId === "string" && Number.isFinite(item.turns) && item.turns > 0 && Number.isFinite(item.timestamp)).slice(0, 100);
+    return data.filter((item): item is LabCompletion => item && (item.mode === "teach" || item.mode === "room" || item.mode === "sign") && typeof item.missionId === "string" && Number.isFinite(item.turns) && item.turns > 0 && Number.isFinite(item.timestamp)).slice(0, 100);
   } catch { return []; }
 }
 

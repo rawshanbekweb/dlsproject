@@ -83,6 +83,11 @@
 .lab-feature--room .lab-art-skill, .lab-feature--room .lab-art-index { color: #6b9585; }
 .lab-feature--room .lab-feature-meta span, .lab-feature--room .lab-card-link > span { background: #edf4f0; color: #5d8977; }
 .lab-feature--room .lab-card-link { border-color: #e5eeE9; color: #538a75; }
+.lab-feature--signs { border-color: #eee0c4; }
+.lab-feature--signs .lab-feature-art { background: #f8efd9; }
+.lab-feature--signs .lab-art-skill, .lab-feature--signs .lab-art-index { color: #a1802f; }
+.lab-feature--signs .lab-feature-meta span, .lab-feature--signs .lab-card-link > span { background: #f5ecd6; color: #8a6b28; }
+.lab-feature--signs .lab-card-link { border-color: #efe3c6; color: #8a6b28; }
 .lab-mini-room .mini-window { left: 25%; top: 40px; height: 75px; width: 62px; border-width: 6px; }
 .lab-mini-room .mini-window::after { left: 24px; }
 .lab-mini-room .mini-shelf { top: 107px; right: 25%; width: 70px; background: #a9beb3; }

@@ -49,6 +49,9 @@
 .lab-feature--room { border-color: #dce9ed; }
 .lab-feature--room .lab-feature-art { background: #e9f4f7; }
 .lab-feature--room .lab-eyebrow, .lab-feature--room .lab-card-link { color: #518396; }
+.lab-feature--signs { border-color: #efe2c9; }
+.lab-feature--signs .lab-feature-art { background: #faf1de; }
+.lab-feature--signs .lab-eyebrow, .lab-feature--signs .lab-card-link { color: #a1802f; }
 .mini-window { position: absolute; width: 51px; height: 67px; top: 70px; left: 18px; border: 5px solid white; border-radius: 5px; background: #c1e4f0; }
 .mini-window::after { content: ''; position: absolute; height: 100%; width: 4px; background: white; left: 19px; }
 .mini-shelf { position: absolute; width: 55px; height: 6px; background: #a4bdce; right: 10px; top: 138px; }
