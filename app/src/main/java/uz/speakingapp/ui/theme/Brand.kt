@@ -50,6 +50,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -388,7 +393,20 @@ fun ScoreRing(
         score >= 50 -> PrimaryGradient
         else -> SunnyGradient
     }
-    Box(modifier = modifier.size(ringSize), contentAlignment = Alignment.Center) {
+    // Halqa rangi (yashil/ko'k/oltin) ball sifatini ko'rsatadi — bu ma'lumot
+    // faqat rasm orqali berilgani uchun ekran o'qigich uchun so'z bilan ham
+    // aytiladi. Ichkaridagi ikki Text alohida o'qilmasin deb yopiladi.
+    val quality = when {
+        score >= 80 -> "a'lo natija"
+        score >= 50 -> "yaxshi natija"
+        else -> "yana mashq qiling"
+    }
+    Box(
+        modifier = modifier
+            .size(ringSize)
+            .semantics { contentDescription = "Ball: $shown, 100 dan, $quality" },
+        contentAlignment = Alignment.Center,
+    ) {
         Canvas(Modifier.fillMaxSize()) {
             val s = stroke.toPx()
             val inset = s / 2
@@ -407,7 +425,10 @@ fun ScoreRing(
                 style = Stroke(width = s, cap = StrokeCap.Round),
             )
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.clearAndSetSemantics {},
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text("$shown", style = DisplayScore, color = InkStrong)
             Text("100 DAN", style = OverlineLabel, color = InkMuted)
         }
@@ -430,6 +451,9 @@ fun BrandMicButton(
     stopIcon: ImageVector,
     size: Dp = 88.dp,
     level: Float = 0f,
+    // Standart "Gapirish"/"To'xtatish"ni almashtiradi — masalan MicRing
+    // qolgan vaqtni ham qo'shib beradi.
+    contentDescription: String? = null,
 ) {
     val transition = rememberInfiniteTransition(label = "mic")
     val pulse by transition.animateFloat(
@@ -471,7 +495,8 @@ fun BrandMicButton(
         ) {
             Icon(
                 imageVector = if (recording) stopIcon else micIcon,
-                contentDescription = if (recording) "To'xtatish" else "Gapirish",
+                contentDescription = contentDescription
+                    ?: if (recording) "To'xtatish" else "Gapirish",
                 tint = Color.White,
                 modifier = Modifier.size(size.value.times(0.40f).dp),
             )
@@ -493,6 +518,13 @@ fun MicRing(
     level: Float = 0f,
 ) {
     val pct = if (limit <= 0) 0f else (elapsed.toFloat() / limit).coerceIn(0f, 1f)
+    // Vaqt halqa sifatida chiziladi — ekran o'qigich uchun so'z bilan ham.
+    val remaining = (limit - elapsed).coerceAtLeast(0)
+    val description = if (recording) {
+        "Yozib olishni to'xtatish, $remaining soniya qoldi"
+    } else {
+        "Yozib olishni boshlash"
+    }
     Box(modifier = Modifier.size(ringSize), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val s = stroke.toPx()
@@ -521,6 +553,7 @@ fun MicRing(
             stopIcon = stopIcon,
             size = ringSize - 44.dp,
             level = level,
+            contentDescription = description,
         )
     }
 }
@@ -654,12 +687,16 @@ fun BrandProgressBar(progress: Float, modifier: Modifier = Modifier, brush: Brus
         animationSpec = tween(700),
         label = "progress",
     )
+    val fraction = progress.coerceIn(0f, 1f)
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(12.dp)
             .clip(CircleShape)
-            .background(SurfaceMuted),
+            .background(SurfaceMuted)
+            .semantics {
+                progressBarRangeInfo = ProgressBarRangeInfo(current = fraction, range = 0f..1f)
+            },
     ) {
         Box(
             Modifier

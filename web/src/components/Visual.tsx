@@ -40,7 +40,12 @@ export function Visual({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt=""
+          // Rasm mazmun (bola shu haqida gapiradi), bezak emas — shuning
+          // uchun `alt=""` YARAMAYDI: ko'r o'quvchi ekran o'qigichda
+          // mashqning O'ZINI eshitmay qoladi. Alohida matnli tavsif hali
+          // yo'q, shuning uchun emoji-token ishlatiladi — ko'p ekran
+          // o'qigichlar (VoiceOver/NVDA/JAWS) emojini so'z bilan o'qiydi.
+          alt={tokenIsUrl ? "" : token}
           className="h-full w-full object-cover"
           loading="lazy"
           onError={() => setFailed(true)}

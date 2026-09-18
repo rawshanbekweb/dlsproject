@@ -45,6 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -375,7 +379,12 @@ private fun KeywordChips(keywords: List<String>, spoken: Set<String>) {
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.extraSmall)
                         .background(if (hit) SuccessContainer else SurfaceMuted)
-                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                        .padding(horizontal = 8.dp, vertical = 5.dp)
+                        // Aytilgan/aytilmagan holati faqat rang bilan farqlanadi —
+                        // ekran o'qigich uchun so'z bilan ham aytiladi.
+                        .semantics {
+                            contentDescription = if (hit) "$kw, aytildi" else "$kw, hali aytilmadi"
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (hit) {
@@ -409,7 +418,23 @@ private fun spokenKeywords(text: String, keywords: List<String>): Set<String> =
  */
 @Composable
 private fun MicLevelBar(level: Float) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+    // Band'ga aylantiramiz (raqamning o'ziga emas) — aks holda qiymat har
+    // freymda o'zgargani uchun ekran o'qigich to'xtovsiz gapirib ketardi.
+    // Band o'zgarganda GINA yangi e'lon eshitiladi.
+    val band = when {
+        level < 0.08f -> "juda past"
+        level < 0.4f -> "yetarli"
+        else -> "baland"
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                liveRegion = LiveRegionMode.Polite
+                contentDescription = "Ovoz darajasi: $band"
+            },
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically) {
             repeat(16) { i ->
                 val active = level * 16 > i
@@ -786,7 +811,21 @@ private fun ReadWords(words: List<ReadWord>) {
             if (i < words.size - 1) append(" ")
         }
     }
-    Text(text, style = MaterialTheme.typography.titleMedium)
+    // To'g'ri/xato holati faqat rang va chizish bilan ko'rsatilgan — ekran
+    // o'qigich rangni "ko'rmaydi" va matnni bir tekis o'qib beradi. Shuning
+    // uchun qaysi so'zlar xato/tushib qolgani alohida so'z bilan aytiladi.
+    val missed = words.filter { it.status != WordStatus.CORRECT }
+    val summary = if (missed.isEmpty()) {
+        "Barcha ${words.size} so'z to'g'ri aytildi: ${words.joinToString(" ") { it.word }}"
+    } else {
+        "Xato yoki eshitilmagan so'zlar: ${missed.joinToString(", ") { it.word }}. " +
+            "Qolgan ${words.size - missed.size} so'z to'g'ri aytildi."
+    }
+    Text(
+        text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.semantics { contentDescription = summary },
+    )
 }
 
 /**
@@ -800,12 +839,20 @@ private fun TipLine(tip: CoachTip) {
         TipKind.STRUCTURE -> OnGoldContainer
         else -> Navy
     }
+    // Maslahat turi (maqtov/struktura/umumiy) faqat kvadratcha rangi bilan
+    // ko'rsatiladi — matn bilan ham aytiladi.
+    val kindLabel = when (tip.kind) {
+        TipKind.PRAISE -> "Maqtov"
+        TipKind.STRUCTURE -> "Struktura tuzatishi"
+        else -> "Maslahat"
+    }
     Row(Modifier.padding(vertical = 6.dp)) {
         Box(
             Modifier
                 .padding(top = 6.dp, end = 10.dp)
                 .size(8.dp)
                 .background(mark)
+                .semantics { contentDescription = kindLabel }
         )
         Column {
             Text(tip.title, style = MaterialTheme.typography.titleSmall, color = InkStrong)
