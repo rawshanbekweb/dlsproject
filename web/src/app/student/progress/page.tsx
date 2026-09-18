@@ -35,7 +35,7 @@ export default function ProgressPage() {
   const stats = useMemo(() => (attempts ? moduleStats(attempts) : []), [attempts]);
 
   return (
-    <div className="pattern-page min-h-screen">
+    <div className="student-lab-home pattern-page min-h-screen">
       <header className="hero-navy hero-photo-book px-4 py-4 text-white">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <Link

@@ -257,7 +257,7 @@ export default function ExercisePage() {
   const spokenNow = new Set(matchedKeywords(liveText, exercise.keywords));
 
   return (
-    <div className="pattern-page min-h-screen">
+    <div className="student-lab-home pattern-page min-h-screen">
       <header className="hero-navy px-4 py-4 text-white">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <Link

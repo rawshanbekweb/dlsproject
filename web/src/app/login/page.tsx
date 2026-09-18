@@ -30,7 +30,7 @@ export default async function LoginPage({
   const next = params.next;
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="student-lab-home flex min-h-screen flex-col lg:flex-row">
       {/* Chap panel: brend yuzasi. Kichik ekranda ingichka sarlavhaga aylanadi. */}
       <div className="hero-navy hero-photo-classroom flex flex-col justify-center px-6 py-10 text-white lg:w-[45%] lg:px-14">
         <Link href="/" className="inline-flex w-fit flex-col">

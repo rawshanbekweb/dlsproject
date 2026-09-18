@@ -25,7 +25,7 @@ const UPDATED = "17-sentyabr, 2026";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="pattern-page min-h-screen bg-surface-page">
+    <div className="student-lab-home pattern-page min-h-screen bg-surface-page">
       <header className="hero-navy text-white">
         <nav className="border-b border-white/15">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4">
