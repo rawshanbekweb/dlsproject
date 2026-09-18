@@ -14,6 +14,15 @@ export default defineConfig({
     // Set PLAYWRIGHT_CHANNEL=msedge to use an existing Windows Edge installation.
     channel: process.env.PLAYWRIGHT_CHANNEL || undefined,
     trace: "retain-on-failure",
+    // Imo-ishora testlari uchun: haqiqiy kamerasiz `getUserMedia()`ni sinash.
+    // Chromium sintetik video (harakatlanuvchi naqsh) beradi — qo'l ko'rinmaydi,
+    // lekin butun kamera+MediaPipe quvuri (ruxsat, video oqimi, aniqlash sikli)
+    // haqiqiy brauzerda ishlaydi. `--use-fake-ui-for-media-stream` ruxsat
+    // so'rovini avtomatik tasdiqlaydi (`grantPermissions` bilan birga xavfsiz).
+    permissions: ["camera"],
+    launchOptions: {
+      args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+    },
   },
   webServer: {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
